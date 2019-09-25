@@ -14,6 +14,7 @@ async function fetchInzendingen(bestuurseenheidUri) {
     CONSTRUCT {
       ?inzending a meb:Submissions ;
         adms:status ?inzendingStatus .
+      ?inzendingStatus skos:prefLabel ?inzendingStatusLabel .
     }
     WHERE {
       GRAPH ${sparqlEscapeUri(publicGraph)} {
@@ -21,6 +22,7 @@ async function fetchInzendingen(bestuurseenheidUri) {
           pav:createdBy ${sparqlEscapeUri(bestuurseenheidUri)} ;
           adms:status ?inzendingStatus ;
           dct:subject ?document .
+        ?inzendingStatus skos:prefLabel ?inzendingStatusLabel .
         ?document eli:date_publication ?publicationDate .
       }
     }
