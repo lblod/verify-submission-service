@@ -6,7 +6,7 @@ Microservice that helps verifying the content of submissions
 
 Add the following snippet to your `docker-compose.yml`:
 ```
-  export:
+  verify-submission:
     image: lblod/verify-submission-service
     links:
       - database:database
