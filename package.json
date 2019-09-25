@@ -1,6 +1,6 @@
 {
   "name": "verify-submission-service",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Microservice that helps verifying the content of submissions",
   "main": "app.js",
   "scripts": {
