@@ -1,26 +1,25 @@
-import { app, query, errorHandler } from 'mu';
+import { app, errorHandler } from 'mu';
+
+import {
+  fetchInzendingen
+} from './queries';
 
 app.get('/', function( req, res ) {
-  res.send('Hello mu-javascript-template');
+  res.send('Hello from verify-submission-service');
 } );
 
-
-app.get('/query', function( req, res ) {
-  var myQuery = `
-    SELECT *
-    WHERE {
-      GRAPH <http://mu.semte.ch/application> {
-        ?s ?p ?o.
-      }
-    }`;
-
-  query( myQuery )
-    .then( function(response) {
-      res.send( JSON.stringify( response ) );
-    })
-    .catch( function(err) {
-      res.send( "Oops something went wrong: " + JSON.stringify( err ) );
-    });
+app.get('/bestuurseenheid/:uri', async function( req, res ) {
+  try {
+    const bestuurseenheidUri = req.params.uri;
+    const inzendingen = await fetchInzendingen(bestuurseenheidUri);
+    if (inzendingen.length > 0) {
+      res.status(200).send({inzendingen}).end();
+    } else {
+      res.status(204).send({inzendingen}).end();
+    }
+  } catch (e) {
+    console.log(`An error has occured: ${e}`)
+  }
 } );
 
 app.use(errorHandler);
