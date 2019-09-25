@@ -2,6 +2,12 @@
 
 Microservice that helps verifying the content of submissions
 
+## API
+
+This service features two endpoits:
+* `GET /bestuurseenheid/:uri` (param: encoded bestuurseenheid URI): get all the inzendingen and their statuses for a bestuurseenheid
+* `GET /inzending/:uri` (param: encoded task URI, returned by the service `automatic-submission-service`): get all the triples related to the inzending and the document from an automatic submission task
+
 ## Installation
 
 Add the following snippet to your `docker-compose.yml`:
@@ -16,9 +22,3 @@ Add the following snippet to your `docker-compose.yml`:
 
 The following environment variables can be configured:
 * `GRAPH` (default: http://mu.semte.ch/graphs/public): The graph where the triples reside
-
-### Endpoints
-
-This service features two endpoits:
-* `/bestuurseenheid/:uri` (param: encoded bestuurseenheid URI): the user can GET all the inzendingen and their statuses for a bestuurseenheid
-* `/inzending/:uri` (param: encoded task URI, returned by the service `automatic-submission-service`): the user can GET all the triples related to the inzending and the document from an automatic submission task
