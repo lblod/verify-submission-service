@@ -1,7 +1,7 @@
 import { sparqlEscapeUri } from 'mu';
 import { querySudo as query } from '@lblod/mu-auth-sudo';
 
-const publicGraph = process.env.PUBLIC_GRAPH || 'http://mu.semte.ch/graphs/public';
+const graph = process.env.GRAPH || 'http://mu.semte.ch/graphs/public';
 
 async function fetchInzendingen(bestuurseenheidUri) {
   return await query(`
@@ -17,7 +17,7 @@ async function fetchInzendingen(bestuurseenheidUri) {
       ?inzendingStatus skos:prefLabel ?statusLabel .
     }
     WHERE {
-      GRAPH ${sparqlEscapeUri(publicGraph)} {
+      GRAPH ${sparqlEscapeUri(graph)} {
         ?inzending a meb:Submission ;
           pav:createdBy ${sparqlEscapeUri(bestuurseenheidUri)} ;
           adms:status ?status ;
@@ -72,7 +72,7 @@ async function fetchInzendingTriples(taskUri) {
         lblodBesluit:hasAdditionalTaxRate ?hasAdditionalTaxRate .
     }
     WHERE {
-      GRAPH ${sparqlEscapeUri(publicGraph)} {
+      GRAPH ${sparqlEscapeUri(graph)} {
         ${sparqlEscapeUri(taskUri)} prov:generated ?inzending .
         ?inzending a meb:Submission ;
           mu:uuid ?uuidInzending ;
