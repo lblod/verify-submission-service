@@ -17,7 +17,7 @@ async function fetchInzendingen(bestuurseenheidUri) {
       ?inzendingStatus skos:prefLabel ?statusLabel .
     }
     WHERE {
-      GRAPH ${sparqlEscapeUri(graph)} {
+      GRAPH ?g {
         ?inzending a meb:Submission ;
           pav:createdBy ${sparqlEscapeUri(bestuurseenheidUri)} ;
           adms:status ?status ;
@@ -54,10 +54,7 @@ async function fetchInzendingTriples(taskUri) {
         dct:subject ?submittedResource ;
         adms:status ?status ;
         prov:atLocation ?url ;
-        nie:hasPart ?file ;
-        melding:authenticityType ?authenticityType ;
-        dct:description ?beschrijving ;
-        rdfs:comment ?opmerking .
+        nie:hasPart ?file .
       ?submittedResource a foaf:Document ;
         mu:uuid ?uuidDocument ;
         eli:date_publication ?publicationDate ;
@@ -69,34 +66,37 @@ async function fetchInzendingTriples(taskUri) {
         lblodBesluit:chartOfAccount ?chartOfAccount ;
         lblodBesluit:taxRate ?taxRate ;
         lblodBesluit:taxType ?taxType ;
-        lblodBesluit:hasAdditionalTaxRate ?hasAdditionalTaxRate .
+        lblodBesluit:hasAdditionalTaxRate ?hasAdditionalTaxRate ;
+        melding:authenticityType ?authenticityType ;
+        dct:description ?beschrijving ;
+        rdfs:comment ?opmerking .
     }
     WHERE {
-      GRAPH ${sparqlEscapeUri(graph)} {
+      GRAPH ?g {
         ${sparqlEscapeUri(taskUri)} prov:generated ?inzending .
         ?inzending a meb:Submission ;
-          mu:uuid ?uuidInzending ;
-          pav:createdBy ?organization ;
-          pav:providedBy ?publisher ;
-          dct:subject ?submittedResource ;
-          adms:status ?status ;
-          prov:atLocation ?url ;
-          nie:hasPart ?file ;
-          melding:authenticityType ?authenticityType ;
-          dct:description ?beschrijving ;
-          rdfs:comment ?opmerking .
+          mu:uuid ?uuidInzending .
+          ?inzending dct:subject ?submittedResource .
+          OPTIONAL { ?inzending pav:createdBy ?organization . }
+          OPTIONAL { ?inzending pav:providedBy ?publisher . }
+          OPTIONAL { ?inzending adms:status ?status . }
+          OPTIONAL { ?inzending prov:atLocation ?url . }
+          OPTIONAL { ?inzending nie:hasPart ?file . }
         ?submittedResource a foaf:Document ;
-          mu:uuid ?uuidDocument ;
-          eli:date_publication ?publicationDate ;
-          eli:passed_by ?passedBy ;
-          eli:is_about ?subject ;
-          elod:financialYear ?reportYear ;
-          eli:first_date_entry_in_force ?firstDateInForce ;
-          eli:date_no_longer_in_force ?dateNoLongerInForce ;
-          lblodBesluit:chartOfAccount ?chartOfAccount ;
-          lblodBesluit:taxRate ?taxRate ;
-          lblodBesluit:taxType ?taxType ;
-          lblodBesluit:hasAdditionalTaxRate ?hasAdditionalTaxRate .
+          mu:uuid ?uuidDocument .
+          OPTIONAL { ?submittedResource eli:date_publication ?publicationDate . }
+          OPTIONAL { ?submittedResource eli:passed_by ?passedBy . }
+          OPTIONAL { ?submittedResource eli:is_about ?subject . }
+          OPTIONAL { ?submittedResource elod:financialYear ?reportYear . }
+          OPTIONAL { ?submittedResource eli:first_date_entry_in_force ?firstDateInForce . }
+          OPTIONAL { ?submittedResource eli:date_no_longer_in_force ?dateNoLongerInForce . }
+          OPTIONAL { ?submittedResource melding:authenticityType ?authenticityType . }
+          OPTIONAL { ?submittedResource lblodBesluit:chartOfAccount ?chartOfAccount . }
+          OPTIONAL { ?submittedResource lblodBesluit:taxRate ?taxRate . }
+          OPTIONAL { ?submittedResource lblodBesluit:taxType ?taxType . }
+          OPTIONAL { ?submittedResource lblodBesluit:hasAdditionalTaxRate ?hasAdditionalTaxRate . }
+          OPTIONAL { ?submittedResource dct:description ?beschrijving . }
+          OPTIONAL { ?submittedResource rdfs:comment ?opmerking . }
       }
     }
   `);

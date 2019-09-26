@@ -9,31 +9,33 @@ app.get('/', function( req, res ) {
   res.send('Hello from verify-submission-service');
 } );
 
-app.get('/bestuurseenheid/:uri', async function( req, res ) {
+app.get('/bestuurseenheid/:uri', async function( req, res, next ) {
   try {
-    const bestuurseenheidUri = req.params.uri;
+    const bestuurseenheidUri = req.query.uri;
     const inzendingen = await fetchInzendingen(bestuurseenheidUri);
-    if (inzendingen.length > 0) {
-      res.status(200).send({inzendingen}).end();
+    if (inzendingen.length) {
+      return res.status(200).send({inzendingen});
     } else {
-      res.status(204).send({inzendingen}).end();
+      return res.status(204).send({inzendingen});
     }
   } catch (e) {
-    console.log(`An error has occured: ${e}`)
+    console.log(`An error has occured: ${e}`);
+    return next(e);
   }
 } );
 
-app.get('/inzending/:uri', async function( req, res ) {
+app.get('/inzending', async function( req, res, next ) {
   try {
-    const taskUri = req.params.uri;
+    const taskUri = req.query.uri;
     const triples = await fetchInzendingTriples(taskUri);
-    if (triples.length > 0) {
-      res.status(200).send({triples}).end();
+    if (triples.length) {
+      return res.status(200).send({triples});
     } else {
-      res.status(204).send({triples}).end();
+      return res.status(204).send();
     }
   } catch (e) {
-    console.log(`An error has occured: ${e}`)
+    console.log(`An error has occured: ${e}`);
+    return next(e);
   }
 } );
 
