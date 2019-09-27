@@ -1,8 +1,6 @@
 import { query, sparqlEscapeUri } from 'mu';
 import request from 'request';
 
-const graph = process.env.GRAPH || 'http://mu.semte.ch/graphs/public';
-
 async function fetchInzendingen(bestuurseenheidUri) {
   const result = await query(`
     PREFIX meb: <http://rdf.myexperiment.org/ontologies/base/>
