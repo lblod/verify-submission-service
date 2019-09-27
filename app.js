@@ -9,15 +9,11 @@ app.get('/', function( req, res ) {
   res.send('Hello from verify-submission-service');
 } );
 
-app.get('/bestuurseenheid/:uri', async function( req, res, next ) {
+app.get('/bestuurseenheid', async function( req, res, next ) {
   try {
     const bestuurseenheidUri = req.query.uri;
     const inzendingen = await fetchInzendingen(bestuurseenheidUri);
-    if (inzendingen.length) {
-      return res.status(200).send({inzendingen});
-    } else {
-      return res.status(204).send({inzendingen});
-    }
+    return res.status(200).send({ data: inzendingen });
   } catch (e) {
     console.log(`An error has occured: ${e}`);
     return next(e);
@@ -27,12 +23,9 @@ app.get('/bestuurseenheid/:uri', async function( req, res, next ) {
 app.get('/inzending', async function( req, res, next ) {
   try {
     const taskUri = req.query.uri;
-    const triples = await fetchInzendingTriples(taskUri);
-    if (triples.length) {
-      return res.status(200).send({triples});
-    } else {
-      return res.status(204).send();
-    }
+    console.log(`Trying to retrieve triples harvested by task <${taskUri}>`);
+    const content = await fetchInzendingTriples(taskUri);
+    return res.status(200).type('text/plain').send(content);
   } catch (e) {
     console.log(`An error has occured: ${e}`);
     return next(e);

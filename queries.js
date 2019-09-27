@@ -1,37 +1,42 @@
-import { sparqlEscapeUri } from 'mu';
-import { querySudo as query } from '@lblod/mu-auth-sudo';
+import { query, sparqlEscapeUri } from 'mu';
+import request from 'request';
 
 const graph = process.env.GRAPH || 'http://mu.semte.ch/graphs/public';
 
 async function fetchInzendingen(bestuurseenheidUri) {
-  return await query(`
+  const result = await query(`
     PREFIX meb: <http://rdf.myexperiment.org/ontologies/base/>
     PREFIX adms: <http://www.w3.org/ns/adms#>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX dct: <http://purl.org/dc/terms/>
     PREFIX eli: <http://data.europa.eu/eli/ontology#>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
 
-    CONSTRUCT {
-      ?inzending a meb:Submission ;
-        adms:status ?status .
-      ?inzendingStatus skos:prefLabel ?statusLabel .
-    }
+    SELECT ?task ?created ?modified ?inzending ?document
     WHERE {
       GRAPH ?g {
+        ?task prov:generated ?inzending ;
+          dct:created ?created ;
+          dct:modified ?modified .
         ?inzending a meb:Submission ;
-          pav:createdBy ${sparqlEscapeUri(bestuurseenheidUri)} ;
-          adms:status ?status ;
-          dct:subject ?document .
-        ?inzendingStatus skos:prefLabel ?statusLabel .
-        ?document eli:date_publication ?publicationDate .
+          pav:createdBy ${sparqlEscapeUri(bestuurseenheidUri)} .
+        OPTIONAL { ?inzending dct:subject ?document . }
       }
     }
-    ORDER BY DESC(?publicationDate)
+    ORDER BY DESC(?created)
   `);
+  return result.results.bindings.map(b => {
+    return {
+      created: b['created'].value,
+      modified: b['modified'].value,
+      submission: b['inzending'].value,
+      submittedResource: b['document'].value
+    };
+  });
 }
 
 async function fetchInzendingTriples(taskUri) {
-  return await query(`
+  return await constructQuery(`
     PREFIX meb: <http://rdf.myexperiment.org/ontologies/base/>
     PREFIX adms: <http://www.w3.org/ns/adms#>
     PREFIX pav: <http://purl.org/pav/>
@@ -48,7 +53,6 @@ async function fetchInzendingTriples(taskUri) {
 
     CONSTRUCT {
       ?inzending a meb:Submission ;
-        mu:uuid ?uuidInzending ;
         pav:createdBy ?organization ;
         pav:providedBy ?publisher ;
         dct:subject ?submittedResource ;
@@ -56,7 +60,6 @@ async function fetchInzendingTriples(taskUri) {
         prov:atLocation ?url ;
         nie:hasPart ?file .
       ?submittedResource a foaf:Document ;
-        mu:uuid ?uuidDocument ;
         eli:date_publication ?publicationDate ;
         eli:passed_by ?passedBy ;
         eli:is_about ?subject ;
@@ -101,6 +104,31 @@ async function fetchInzendingTriples(taskUri) {
     }
   `);
 }
+
+async function constructQuery(query) {
+  const format = 'text/plain'; // N-triples format
+  const options = {
+    method: 'POST',
+    url: process.env.MU_SPARQL_ENDPOINT,
+    headers: {
+      'Accept': format
+    },
+    qs: {
+      format: format,
+      query: query
+    }
+  };
+
+  return new Promise ( (resolve,reject) => {
+    return request(options, function(error, response, body) {
+      if (error)
+        reject(error);
+      else
+        resolve(body);
+    });
+  });
+}
+
 export {
   fetchInzendingen,
   fetchInzendingTriples
